@@ -1,57 +1,40 @@
-# Compiled source #
-###################
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-
-# Compiled output #
-##################
-dist/
-tmp/
-out-tsc/
-bazel-out/
-
-# Node #
-########
-node_modules/
-npm-debug.log
-yarn-error.log
-
-# Python #
-#########
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.installed.cfg
-*.egg
-.Python
-env/
+# 가상 환경 관련 파일
 venv/
+env/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.pytest_cache/
+.env/
 
-# Editors #
-###########
-.vscode/
+# 컴파일된 파이썬 파일
+*.pyc
+*.pyo
+__pycache__/
+
+# IDE 및 편집기 파일
 .idea/
+.vscode/
 *.swp
 *.swo
 
-# OS generated files #
-######################
+# 로그 파일
+*.log
+logs/
+
+# 임시 파일
+*.tmp
+*.bak
+*.old
+
+# macOS 시스템 파일
 .DS_Store
 Thumbs.db
 
-# Misc #
-########
-.env
-.env.*
-*.log
-*.db
-*.sqlite3
+# 기타 시스템 파일
+.AppleDouble
+.LSOverride
+ehthumbs.db
+[Tt]humbs.db
+
+# 프로젝트 관련 파일
+build/
+dist/
+*.egg-info/
