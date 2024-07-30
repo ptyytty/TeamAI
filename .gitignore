@@ -4,6 +4,7 @@ env/
 .venv/
 .env/
 
+*.jpg
 # 컴파일된 파이썬 파일
 *.pyc
 *.pyo
