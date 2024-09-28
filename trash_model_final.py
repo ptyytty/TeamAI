@@ -256,30 +256,30 @@ def predict_and_save(model, dataloader, output_csv, device):
     return total_time
 
 
-# def create_weighted_sampler(train_csv_path):
-#     # 클래스 카운트 계산
-#     class_counts = pd.read_csv(train_csv_path)['category'].value_counts()
+def create_weighted_sampler(train_csv_path):
+    # 클래스 카운트 계산
+    class_counts = pd.read_csv(train_csv_path)['category'].value_counts()
     
-#     # 클래스 가중치 초기화
-#     class_weights = {i: 1.0 for i in range(83)}  # 84개의 클래스를 위해 초기화
+    # 클래스 가중치 초기화
+    class_weights = {i: 1.0 for i in range(83)}  # 83개의 클래스를 위해 초기화
     
-#     # 각 클래스의 가중치 계산
-#     for cls in class_counts.index:
-#         class_weights[cls] = 1.0 / class_counts[cls]  # 예시로 역수 가중치 사용
+    # 각 클래스의 가중치 계산
+    for cls in class_counts.index:
+        class_weights[cls] = 1.0 / class_counts[cls]  # 예시로 역수 가중치 사용
     
-#     # 각 샘플에 대한 가중치 리스트 생성
-#     weights = []
-#     df = pd.read_csv(train_csv_path)
+    # 각 샘플에 대한 가중치 리스트 생성
+    weights = []
+    df = pd.read_csv(train_csv_path)
     
-#     for category in df['category']:
-#         weights.append(class_weights[category])
+    for category in df['category']:
+        weights.append(class_weights[category])
     
      
-#     sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+    sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
 
     
     
-#     return sampler, torch.tensor(list(class_weights.values()), dtype=torch.float32)
+    return sampler, torch.tensor(list(class_weights.values()), dtype=torch.float32)
 
 # 메인 함수
 def main(selected_model, epoch_count):
@@ -293,8 +293,8 @@ def main(selected_model, epoch_count):
     train_csv_path = os.path.join(TRAIN_CSV_PATH, "train_data.csv")
     train_dataset = CustomDataset(image_dir=TRAIN_DIR, csv_file=train_csv_path, transform=train_transform,is_training=True)
     
-    # sampler, class_weights_tensor = create_weighted_sampler(train_csv_path)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True,pin_memory=True,num_workers=4)
+    sampler, class_weights_tensor = create_weighted_sampler(train_csv_path)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False,pin_memory=True,num_workers=4,sampler=sampler)
 
     # 정답 레이블이 포함된 테스트 데이터 로드
     test_data = pd.read_csv(TEST_CSV_PATH)
@@ -343,7 +343,7 @@ def main(selected_model, epoch_count):
         model = model.to(device)
 
         # 손실 함수 및 최적화 방법 정의
-        criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss(weight=class_weights_tensor.to(device))
         optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.01)
 
         # 체크포인트 파일 경로 설정
@@ -353,7 +353,7 @@ def main(selected_model, epoch_count):
     
 
         # 모델 학습 및 가장 좋은 가중치 저장
-        best_f1, best_model_wts, training_time, train_f1_scores, val_f1_scores = train_model(
+        best_f1, best_model_wts, total_time, train_f1_scores, val_f1_scores = train_model(
             model, 
             {'train': train_loader, 'val': train_loader}, 
             criterion, 
@@ -369,7 +369,7 @@ def main(selected_model, epoch_count):
         print(f"{model_name} model saved as {model_filename}")
 
         # 학습 시간 기록
-        training_times[model_name] = training_time
+        training_times[model_name] = total_time
 
         predict_dataset = CustomDataset(image_dir=PREDICT_DIR, csv_file=predict_csv_files[model_name], transform=predict_transform)
         predict_loader = DataLoader(predict_dataset, batch_size=64, shuffle=False,pin_memory=True,num_workers=4)
