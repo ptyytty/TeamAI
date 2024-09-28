@@ -364,7 +364,7 @@ def main(selected_model, epoch_count):
         # 학습 시간 기록
         training_times[model_name] = total_time
 
-        predict_dataset = CustomDataset(image_dir=PREDICT_DIR, csv_file=predict_csv_files[model_name], transform=predict_transform)
+        predict_dataset = CustomDataset(image_dir=PREDICT_DIR, csv_file=predict_csv_files[model_name], transform=predict_transform,is_training=False)
         predict_loader = DataLoader(predict_dataset, batch_size=32, shuffle=False,pin_memory=True,num_workers=4)
       
         
